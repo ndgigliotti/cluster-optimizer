@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This project provides a simple, Scikit-Learn-compatible, hyperparameter optimization tool for clustering. This project is intended for situations where there is no need to predict clusters for new data points. Many clustering algorithms in Scikit-Learn are transductive, meaning that they are not designed to be applied to new observations. Even if using an inductive clustering algorithm like K-Means, you might not have any desire to predict clusters for new observations.
+This project provides a simple, Scikit-Learn-compatible, hyperparameter optimization tool for clustering. It's intended for situations where there is no need to predict clusters for new data points. Many clustering algorithms in Scikit-Learn are transductive, meaning that they are not designed to be applied to new observations. Even if using an inductive clustering algorithm like K-Means, you might not have any desire to predict clusters for new observations.
 
 Since Scikit-Learn's `GridSearchCV` uses cross-validation, and is designed to optimize inductive machine learning algorithms, it was necessary to create an alternative tool.
 
