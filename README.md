@@ -56,7 +56,7 @@ It's important to consider your dataset and goals before comparing clustering al
 
 ### No Multi-Metric Scoring
 
-Multi-metric scoring is currently not supported. There are plans to add it in the future.
+Multi-metric scoring is currently not supported, but there are plans to add it in the future.
 
 ## Future Work
 
