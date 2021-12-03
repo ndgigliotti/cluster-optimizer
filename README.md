@@ -25,7 +25,7 @@ You can use `ClusterOptimizer` by passing the string name of a Scikit-Learn clus
 
 ### Recognized Scorer Names
 
-Note that the 'score' suffix is always optional.
+Note that the '_score' suffix is always optional.
 
 - 'silhouette_score'
 - 'silhouette_score_euclidean'
