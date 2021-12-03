@@ -44,6 +44,12 @@ Note that the 'score' suffix is always optional.
 - 'homogeneity_score'
 - 'v_measure_score'
 
+## Caveats
+
+### Comparing Clustering Algorithms
+
+It's important to consider your dataset and goals before comparing clustering algorithms in a grid search. Just because one algorithm gets a higher score than another does not necessarily make it a better choice. Different clustering algorithms have [different benefits, drawbacks, and use cases.](https://scikit-learn.org/stable/modules/clustering.html#overview-of-clustering-methods)
+
 ## Reliance on Scikit-Learn
 
 I could have created a cluster optimizer from scratch, but it would've taken much more work and wouldn't have been as reliable. Plus, people are familiar with Scikit-Learn's search estimators. Nevertheless, in the future, it might be a good idea to create a new version of `BaseSearchCV` (which contains the Scikit-Learn search machinery) for transductive clustering purposes.

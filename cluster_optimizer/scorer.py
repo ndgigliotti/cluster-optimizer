@@ -6,6 +6,7 @@ from sklearn.utils.validation import check_consistent_length, check_is_fitted
 
 
 def _get_labels(estimator):
+    """Gets the cluster labels from an estimator or pipeline."""
     if isinstance(estimator, Pipeline):
         check_is_fitted(estimator._final_estimator, ["labels_"])
         labels = estimator._final_estimator.labels_
@@ -16,6 +17,18 @@ def _get_labels(estimator):
 
 
 def _remove_noise_cluster(*arrays, labels, noise_label=-1):
+    """
+    Removes the noise cluster found in `labels` (if any) from all `arrays`.
+    
+    This function is currently unused, and may be removed in the future.
+    Initially, it seemed like a good idea to remove the noise "cluster" when
+    scoring algorithms like DBSCAN or HDBSCAN. However, this proved to break the
+    optimizer. If the noise cluster is removed, these two algorithms can attain
+    very high scores while classifying 99% of the points as noise. Such misleadingly
+    high scores are robustly selected for on some datasets. Furthermore,
+    retaining the noise "cluster" does not seem to cause problems.
+
+    """
     is_noise = labels == noise_label
     arrays = list(arrays)
     for i, arr in enumerate(arrays):
