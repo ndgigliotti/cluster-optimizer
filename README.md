@@ -31,3 +31,7 @@ The only downsides of relying on `BaseSearchCV` from Scikit-Learn are superficia
 - [ ] Add multi-metric compatibility.
 
 - [ ] Write automated tests.
+
+- [ ] Trim down environment file.
+
+- [ ] Make `setup.py`.
