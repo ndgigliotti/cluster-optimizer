@@ -26,12 +26,9 @@ The only downsides of relying on `BaseSearchCV` from Scikit-Learn are superficia
 
 ## Future Work
 
+- [ ] Finish writing docstrings.
 - [ ] Improve interface to reflect lack of CV.
-
 - [ ] Add multi-metric compatibility.
-
 - [ ] Write automated tests.
-
 - [ ] Trim down environment file.
-
 - [ ] Make `setup.py`.
