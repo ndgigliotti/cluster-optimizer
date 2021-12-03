@@ -24,7 +24,25 @@ Currently, the `ClusterOptimizer` interface is the same as `GridSearchCV`, which
 
 You can use `ClusterOptimizer` by passing the string name of a Scikit-Learn clustering metric, e.g. 'silhouette', 'calinski_harabasz', or 'rand_score' (the '_score' suffix is optional). You can also create a special scorer for transductive clustering using `scorer.make_scorer` on any score function with the signature `score_func(labels_true, labels_fit)` or `score_func(X, labels_fit)`.
 
-Currently 'silhouette_cosine' is the only recognized string for specifying non-Euclidean distance, but more will be added soon.
+
+### Recognized Scorer Names
+
+Note that the 'score' suffix is always optional.
+
+- 'silhouette_score'
+- 'silhouette_score_euclidean'
+- 'silhouette_score_cosine'
+- 'davies_bouldin_score'
+- 'calinski_harabasz_score'
+- 'mutual_info_score'
+- 'normalized_mutual_info_score'
+- 'adjusted_mutual_info_score'
+- 'rand_score'
+- 'adjusted_rand_score'
+- 'completeness_score'
+- 'fowlkes_mallows_score'
+- 'homogeneity_score'
+- 'v_measure_score'
 
 ## Reliance on Scikit-Learn
 
