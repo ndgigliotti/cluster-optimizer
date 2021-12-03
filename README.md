@@ -50,7 +50,7 @@ Note that the 'score' suffix is always optional.
 
 It's important to consider your dataset and goals before comparing clustering algorithms in a grid search. Just because one algorithm gets a higher score than another does not necessarily make it a better choice. Different clustering algorithms have [different benefits, drawbacks, and use cases.](https://scikit-learn.org/stable/modules/clustering.html#overview-of-clustering-methods)
 
-### Reusing the `GridSearchCV` Interface
+### Appropriation of the `GridSearchCV` Interface
 
 `ClusterOptimizer` uses the same machinery as `GridSearchCV` under the hood, and for now, has the same interface. This has some counterintuitive consequences, such as log messages mentioning "CV" and the results being stored in the `cv_results_` attribute. It should be easy to use for someone familiar with the popular `GridSearchCV`, but the naming is hardly ideal.
 
