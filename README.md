@@ -58,9 +58,9 @@ Multi-metric scoring is currently not supported, but there are plans to add it i
 
 ## Future Work
 
-### Reliance on Scikit-Learn's `BaseSearchCV`
+### Independence from `BaseSearchCV`
 
-Currently `ClusterOptimizer` relies heavily `BaseSearchCV` (which defines the Scikit-Learn search machinery). I could have created a cluster optimizer from scratch, but it would've taken much more work to achieve a high level of reliability. Nevertheless, in the future, it would be a good idea to create a new version of `BaseSearchCV` for transductive clustering purposes.
+Currently `ClusterOptimizer` relies heavily on `BaseSearchCV` (which defines the Scikit-Learn search machinery). I could have created a cluster optimizer from scratch, but it would've taken much more work to achieve a high level of reliability. Nevertheless, in the future, it would be a good idea to create a new version of `BaseSearchCV` for transductive clustering purposes.
 
 ### To-Do
 
