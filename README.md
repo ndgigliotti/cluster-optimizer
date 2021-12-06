@@ -16,7 +16,7 @@ Since Scikit-Learn's `GridSearchCV` uses cross-validation, and is designed to op
 
 ## `ClusterOptimizer`
 
-The `ClusterOptimizer` class is a hyperparameter search tool for optimizing clustering models. It simply fits one model per hyperparameter combination and selects the best. It's a spin-off of `GridSearchCV`, and uses the same Scikit-Learn machinery under the hood. The only difference is that it doesn't use cross-validation and is designed to work with special clustering scorers. It's not always necessary to provide a target variable, since clustering metrics such as silhouette, Calinski-Harabasz, and Davies-Bouldin are designed for unsupervised clustering.
+`ClusterOptimizer` is a hyperparameter search tool for optimizing clustering models. It simply fits one model per hyperparameter combination and selects the best. It's a spin-off of `GridSearchCV`, and uses the same Scikit-Learn machinery under the hood. The only difference is that it doesn't use cross-validation and is designed to work with special clustering scorers. It's not always necessary to provide a target variable, since clustering metrics such as silhouette, Calinski-Harabasz, and Davies-Bouldin are designed for unsupervised clustering.
 
 ## Transductive Clustering Scorers
 
