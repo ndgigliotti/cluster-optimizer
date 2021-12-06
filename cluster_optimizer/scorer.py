@@ -235,7 +235,7 @@ def get_scorer(scoring):
         except KeyError:
             raise ValueError(
                 f"'{scoring}' is not a valid scoring value. "
-                "Use sorted(cluster_opt.SCORERS.keys()) "
+                "Use sorted(cluster_optimizer.scorer.SCORERS.keys()) "
                 "to get valid options."
             )
     else:
