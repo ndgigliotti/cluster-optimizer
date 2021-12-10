@@ -5,7 +5,7 @@
 You can install this package with pip using the following command:
 
 ```
-pip git+https://github.com/ndgigliotti/cluster-optimizer.git@main
+pip install git+https://github.com/ndgigliotti/cluster-optimizer.git@main
 ```
 
 ## Purpose
