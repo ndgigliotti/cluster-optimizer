@@ -43,6 +43,7 @@ Note that the '_score' suffix is always optional.
 - 'fowlkes_mallows_score'
 - 'homogeneity_score'
 - 'v_measure_score'
+
 ## Caveats
 
 ### Comparing Clustering Algorithms
@@ -64,4 +65,4 @@ So far, `ClusterOptimizer` has only been tested for clustering. It may have othe
 
 ## Credits
 
-Most of the credit goes to the developers of Scikit-Learn for the engineering behind the search estimators. It's not very hard to spam a bunch of models with different hyperparameters, but it's hard to do it in a robust way with wide compatibility.
+Most of the credit goes to the developers of Scikit-Learn for the engineering behind the search estimators. It's not very hard to spam a bunch of models with different hyperparameters, but it's hard to do it in a robust way with a friendly interface and wide compatibility.
