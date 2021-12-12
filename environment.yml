@@ -151,6 +151,7 @@ dependencies:
   - nltk=3.6.3=pyhd8ed1ab_0
   - notebook=6.4.4=pyha770c72_0
   - numexpr=2.7.3=py39hb80d3ca_1
+  - numpy=1.21.4=py39h6635163_0
   - olefile=0.46=pyhd3eb1b0_0
   - openjpeg=2.4.0=h4fc8c34_0
   - openssl=1.1.1l=h8ffe710_0
@@ -249,6 +250,4 @@ dependencies:
   - zlib=1.2.11=h62dcd97_4
   - zstd=1.5.0=h19a0ad4_1
   - pip:
-    - numpy==1.19.5
     - pypdf4==1.27.0
-prefix: C:\Users\ndgig\anaconda3\envs\nlp-env

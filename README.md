@@ -16,7 +16,9 @@ Since Scikit-Learn's `GridSearchCV` uses cross-validation, and is designed to op
 
 ## `ClusterOptimizer`
 
-The `ClusterOptimizer` class is a hyperparameter search tool for optimizing clustering algorithms. It simply fits one model per hyperparameter combination and selects the best. It's a spin-off of `GridSearchCV`, and uses the same Scikit-Learn machinery under the hood. The only difference is that it doesn't use cross-validation and is designed to work with special clustering scorers. It's not always necessary to provide a target variable, since clustering metrics such as silhouette, Calinski-Harabasz, and Davies-Bouldin are designed for unsupervised clustering.
+The `ClusterOptimizer` class is a hyperparameter search tool for optimizing clustering algorithms. It simply fits one model per hyperparameter combination and selects the best. It's a spin-off of `GridSearchCV`, and the implementation is derived from Scikit-Learn. The only difference is that it doesn't use cross-validation and is designed to work with special clustering scorers. It's not always necessary to provide a target variable, since clustering metrics such as silhouette, Calinski-Harabasz, and Davies-Bouldin are designed for unsupervised clustering.
+
+The interface is largely the same as `GridSearchCV`. One minor difference is that the search results are stored in the `results_` attribute, rather than `cv_results_`.
 
 ## Transductive Clustering Scorers
 
@@ -41,32 +43,25 @@ Note that the '_score' suffix is always optional.
 - 'fowlkes_mallows_score'
 - 'homogeneity_score'
 - 'v_measure_score'
-
 ## Caveats
 
 ### Comparing Clustering Algorithms
 
 It's important to consider your dataset and goals before comparing clustering algorithms in a grid search. Just because one algorithm gets a higher score than another does not necessarily make it a better choice. Different clustering algorithms have [different benefits, drawbacks, and use cases.](https://scikit-learn.org/stable/modules/clustering.html#overview-of-clustering-methods)
 
-### Appropriation of the `GridSearchCV` Interface
+### Only Tested for Clustering
 
-`ClusterOptimizer` uses the same machinery as `GridSearchCV` under the hood, and for now, has the same interface. This has some counterintuitive consequences, such as log messages mentioning "CV" and the results being stored in the `cv_results_` attribute. It should be easy to use for someone familiar with `GridSearchCV`, but the naming is hardly ideal.
-
-### No Multi-Metric Scoring
-
-Multi-metric scoring is currently not supported, but there are plans to add it in the future.
+So far, `ClusterOptimizer` has only been tested for clustering. It may have other applications, and may even work out of the box with some other Scikit-Learn estimators. If it proves to have a lot of other uses, it may need to be renamed.
 
 ## Future Work
 
-### Independence from `BaseSearchCV`
+- [x] Write automated tests.
+- [x] Develop alternative to `BaseSearchCV`.
+- [x] Add multi-metric compatibility.
+- [ ] Explore applications beyond clustering (e.g. LDA).
+- [ ] Update docstrings taken from Scikit-Learn.
+- [ ] Add more search types (e.g. randomized).
 
-Currently `ClusterOptimizer` relies heavily on `BaseSearchCV` (which defines the Scikit-Learn search machinery). I could have created a cluster optimizer from scratch, but it would've taken much more work to achieve a high level of reliability. Nevertheless, in the future, it would be a good idea to create a new version of `BaseSearchCV` for transductive clustering purposes.
+## Credits
 
-### To-Do
-
-- [x] Finish writing docstrings.
-- [x] Make `setup.py`.
-- [ ] Write automated tests.
-- [ ] Trim down environment file.
-- [ ] Develop alternative to `BaseSearchCV`.
-- [ ] Add multi-metric compatibility.
+Most of the credit goes to the developers of Scikit-Learn for the engineering behind the search estimators. It's not very hard to spam a bunch of models with different hyperparameters, but it's hard to do it in a robust way with wide compatibility.
