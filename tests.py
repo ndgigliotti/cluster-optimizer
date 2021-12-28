@@ -10,7 +10,7 @@ from sklearn.utils.validation import check_is_fitted
 from cluster_optimizer import ClusterOptimizer
 
 
-@pytest.mark.filterwarnings("ignore:Scoring failed")
+@pytest.mark.filterwarnings("ignore:Scoring failed", "ignore:Noise ratio")
 def test_singular_metric():
     df, _ = datasets.load_iris(return_X_y=True, as_frame=True)
     df = pd.DataFrame(df)
@@ -31,8 +31,8 @@ def test_singular_metric():
         ],
     )
     assert round(search.best_score_, 1) == 0.7
-    assert search.best_params_["eps"] == 1.0
-    assert search.best_params_["min_samples"] == 5
+    assert search.best_params_["eps"] == 0.75
+    assert search.best_params_["min_samples"] == 20
     assert sorted(search.results_.keys()) == sorted(
         [
             "fit_time",
@@ -42,11 +42,16 @@ def test_singular_metric():
             "rank_score",
             "score",
             "score_time",
+            "noise_ratio",
         ]
     )
 
 
-@pytest.mark.filterwarnings("ignore:Scoring failed", "ignore:One or more")
+@pytest.mark.filterwarnings(
+    "ignore:Scoring failed",
+    "ignore:One or more",
+    "ignore:Noise ratio",
+)
 def test_multi_metric():
     df, _ = datasets.load_iris(return_X_y=True, as_frame=True)
     df = pd.DataFrame(df)
@@ -70,8 +75,8 @@ def test_multi_metric():
         ],
     )
     assert round(search.best_score_, 1) == 0.7
-    assert search.best_params_["eps"] == 1.0
-    assert search.best_params_["min_samples"] == 5
+    assert search.best_params_["eps"] == 0.75
+    assert search.best_params_["min_samples"] == 20
     assert sorted(search.results_.keys()) == sorted(
         [
             "fit_time",
@@ -85,11 +90,12 @@ def test_multi_metric():
             "calinski_harabasz",
             "silhouette",
             "score_time",
+            "noise_ratio",
         ]
     )
 
 
-@pytest.mark.filterwarnings("ignore:Scoring failed")
+@pytest.mark.filterwarnings("ignore:Scoring failed", "ignore:Noise ratio")
 def test_pipeline():
     text = [
         pd.DataFrame.__doc__,
@@ -138,5 +144,6 @@ def test_pipeline():
             "rank_score",
             "score",
             "score_time",
+            "noise_ratio",
         ]
     )

@@ -50,16 +50,12 @@ Note that the '_score' suffix is always optional.
 
 It's important to consider your dataset and goals before comparing clustering algorithms in a grid search. Just because one algorithm gets a higher score than another does not necessarily make it a better choice. Different clustering algorithms have [different benefits, drawbacks, and use cases.](https://scikit-learn.org/stable/modules/clustering.html#overview-of-clustering-methods)
 
-### Only Tested for Clustering
-
-So far, `ClusterOptimizer` has only been tested for clustering. It may have other applications, and may even work out of the box with some other Scikit-Learn estimators. If it proves to have a lot of other uses, it may need to be renamed.
-
 ## Future Work
 
 - [x] Write automated tests.
 - [x] Develop alternative to `BaseSearchCV`.
 - [x] Add multi-metric compatibility.
-- [ ] Explore applications beyond clustering (e.g. LDA).
+- [x] Remove noise "cluster" and impose noise limit.
 - [ ] Update docstrings taken from Scikit-Learn.
 - [ ] Add more search types (e.g. randomized).
 

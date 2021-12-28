@@ -1,5 +1,6 @@
 from types import MappingProxyType
 from typing import Iterable
+import numpy as np
 from sklearn import metrics
 from sklearn.metrics._scorer import _BaseScorer, _passthrough_scorer
 from sklearn.pipeline import Pipeline
@@ -17,19 +18,13 @@ def _get_labels(estimator):
     return labels
 
 
+def _noise_ratio(labels, noise_label=-1):
+    labels = np.asarray(labels)
+    return (labels == noise_label).mean()
+
+
 def _remove_noise_cluster(*arrays, labels, noise_label=-1):
-    """
-    Removes the noise cluster found in `labels` (if any) from all `arrays`.
-
-    This function is currently unused, and may be removed in the future.
-    Initially, it seemed like a good idea to remove the noise "cluster" when
-    scoring algorithms like DBSCAN or HDBSCAN. However, this proved to break the
-    optimizer. If the noise cluster is removed, these two algorithms can attain
-    very high scores while classifying 99% of the points as noise. Such misleadingly
-    high scores are robustly selected for on some datasets. Furthermore,
-    retaining the noise "cluster" does not seem to cause problems.
-
-    """
+    """Removes the noise cluster found in `labels` (if any) from all `arrays`."""
     is_noise = labels == noise_label
     arrays = list(arrays)
     for i, arr in enumerate(arrays):
@@ -61,6 +56,7 @@ class _LabelScorerSupervised(_BaseScorer):
         """
 
         labels = _get_labels(estimator)
+        labels_true, labels = _remove_noise_cluster(labels_true, labels, labels=labels)
         return self._sign * self._score_func(labels_true, labels, **self._kwargs)
 
     def __call__(self, estimator, X, labels_true):
@@ -113,6 +109,7 @@ class _LabelScorerUnsupervised(_BaseScorer):
         labels = _get_labels(estimator)
         if isinstance(estimator, Pipeline):
             X = estimator[:-1].transform(X)
+        X, labels = _remove_noise_cluster(X, labels, labels=labels)
         return self._sign * self._score_func(X, labels, **self._kwargs)
 
     def __call__(self, estimator, X, labels_true=None):

@@ -28,12 +28,13 @@ from sklearn.utils.validation import _check_fit_params, check_is_fitted
 
 from cluster_optimizer.scorer import (
     _get_labels,
+    _noise_ratio,
     check_multimetric_scoring,
     check_scoring,
 )
 
 
-def _score(estimator, X, y, scorer, error_score="raise"):
+def _score(estimator, X, y, scorer, error_score="raise", max_noise=0.1):
     """Compute the score(s) of an estimator on a given data set.
 
     Will return a dict of floats if `scorer` is a dict, otherwise a single
@@ -43,22 +44,35 @@ def _score(estimator, X, y, scorer, error_score="raise"):
         scorers = scorer
     else:
         scorers = {0: scorer}
-    try:
-        if y is None:
-            scores = {name: scorers[name](estimator, X) for name in scorers}
-        else:
-            scores = {name: scorers[name](estimator, X, y) for name in scorers}
-    except Exception:
+
+    noise_ratio = _noise_ratio(_get_labels(estimator))
+    if noise_ratio > max_noise:
         if error_score == "raise":
-            raise
+            raise RuntimeError(f"Noise ratio {noise_ratio:.2f} > {max_noise:.2f}.")
         else:
             scores = {name: error_score for name in scorers}
             warnings.warn(
-                f"Scoring failed. The score for these parameters"
-                f" will be set to {error_score}. Details: \n"
-                f"{format_exc()}",
+                f"Noise ratio {noise_ratio:.2f} > {max_noise:.2f}. "
+                f"The score for these parameters will be set to {error_score}.",
                 UserWarning,
             )
+    else:
+        try:
+            if y is None:
+                scores = {name: scorers[name](estimator, X) for name in scorers}
+            else:
+                scores = {name: scorers[name](estimator, X, y) for name in scorers}
+        except Exception:
+            if error_score == "raise":
+                raise
+            else:
+                scores = {name: error_score for name in scorers}
+                warnings.warn(
+                    f"Scoring failed. The score for these parameters"
+                    f" will be set to {error_score}. Details: \n"
+                    f"{format_exc()}",
+                    UserWarning,
+                )
 
     error_msg = "scoring must return a number, got %s (%s) instead. (scorer=%s)"
 
@@ -87,8 +101,10 @@ def _fit_and_score(
     return_n_samples=False,
     return_times=False,
     return_estimator=False,
+    return_noise_ratios=False,
     candidate_progress=None,
     error_score=np.nan,
+    max_noise=0.1,
 ):
 
     """Fit estimator and compute scores for a given dataset split.
@@ -197,7 +213,7 @@ def _fit_and_score(
             sorted_keys = sorted(parameters)  # Ensure deterministic o/p
             params_msg = ", ".join(f"{k}={parameters[k]}" for k in sorted_keys)
     if verbose > 9:
-        start_msg = f"[CANDIDATE {progress_msg}] START {params_msg}"
+        start_msg = f"[CAND {progress_msg}] START {params_msg}"
         print(f"{start_msg}{(80 - len(start_msg)) * '.'}")
 
     # Adjust length of sample weights
@@ -247,17 +263,19 @@ def _fit_and_score(
         result["fit_failed"] = False
 
         fit_time = time.time() - start_time
-        scores = _score(estimator, X, y, scorer, error_score)
+        scores = _score(estimator, X, y, scorer, error_score, max_noise)
+        noise_ratio = _noise_ratio(_get_labels(estimator))
         score_time = time.time() - start_time - fit_time
 
     if verbose > 1:
         total_time = score_time + fit_time
-        end_msg = f"[CANDIDATE {progress_msg}] END "
+        end_msg = f"[CAND {progress_msg}] END "
         result_msg = params_msg + (";" if params_msg else "")
         if verbose > 2 and isinstance(scores, dict):
             for scorer_name in sorted(scores):
                 result_msg += f" {scorer_name}: ("
                 result_msg += f"score={scores[scorer_name]:.3f})"
+        result_msg += f" noise_ratio={noise_ratio:.2f}"
         result_msg += f" total time={joblib.logger.short_format_time(total_time)}"
 
         # Right align the result_msg
@@ -278,6 +296,8 @@ def _fit_and_score(
         result["parameters"] = parameters
     if return_estimator:
         result["estimator"] = estimator
+    if return_noise_ratios:
+        result["noise_ratio"] = noise_ratio
     return result
 
 
@@ -295,6 +315,7 @@ class BaseSearch(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
         verbose=0,
         pre_dispatch="2*n_jobs",
         error_score=np.nan,
+        max_noise=0.1,
     ):
         self.scoring = scoring
         self.estimator = estimator
@@ -303,6 +324,7 @@ class BaseSearch(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
         self.verbose = verbose
         self.pre_dispatch = pre_dispatch
         self.error_score = error_score
+        self.max_noise = max_noise
 
     @property
     def _estimator_type(self):
@@ -636,8 +658,10 @@ class BaseSearch(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
                 fit_params=fit_params,
                 return_n_samples=True,
                 return_times=True,
+                return_noise_ratios=True,
                 return_parameters=False,
                 error_score=self.error_score,
+                max_noise=self.max_noise,
                 verbose=self.verbose,
             )
         )
@@ -769,6 +793,7 @@ class BaseSearch(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
                     rankdata(-array, method="min"), dtype=np.int32
                 )
 
+        _store("noise_ratio", out["noise_ratio"])
         _store("fit_time", out["fit_time"])
         _store("score_time", out["score_time"])
         # Use one MaskedArray and mask all the places where the param is not
@@ -982,6 +1007,7 @@ class ClusterOptimizer(BaseSearch):
         verbose=0,
         pre_dispatch="2*n_jobs",
         error_score=np.nan,
+        max_noise=0.1,
     ):
         super().__init__(
             estimator=estimator,
@@ -994,6 +1020,7 @@ class ClusterOptimizer(BaseSearch):
         )
         self.param_grid = param_grid
         _check_param_grid(param_grid)
+        self.max_noise = max_noise
 
     def _run_search(self, evaluate_candidates):
         """Search all candidates in param_grid"""
