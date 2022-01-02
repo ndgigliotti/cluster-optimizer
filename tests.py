@@ -10,10 +10,27 @@ from sklearn.utils.validation import check_is_fitted
 from cluster_optimizer import ClusterOptimizer
 
 
+class ErrorClusterer(cluster.DBSCAN):
+    def fit(self, X, y=None):
+        raise RuntimeError("This is a drill.")
+
+
+@pytest.mark.filterwarnings("ignore:Estimator fit failed", "ignore:One or more")
+def test_fit_error():
+    X, _ = datasets.make_blobs(n_samples=100, n_features=2, random_state=325)
+    grid = {"eps": np.arange(0.25, 3.25, 0.25), "min_samples": [5, 20, 50]}
+    search = ClusterOptimizer(
+        ErrorClusterer(), grid, scoring="silhouette", error_score=-1, refit=False
+    )
+    search.fit(X)
+    results = pd.DataFrame(search.results_)
+    assert results["noise_ratio"].isna().all()
+    assert np.all(results["score"] == -1)
+
+
 @pytest.mark.filterwarnings("ignore:Scoring failed", "ignore:Noise ratio")
 def test_singular_metric():
     df, _ = datasets.load_iris(return_X_y=True, as_frame=True)
-    df = pd.DataFrame(df)
     grid = {"eps": np.arange(0.25, 3.25, 0.25), "min_samples": [5, 20, 50]}
     search = ClusterOptimizer(
         cluster.DBSCAN(), grid, scoring="silhouette", error_score=-1
@@ -54,7 +71,6 @@ def test_singular_metric():
 )
 def test_multi_metric():
     df, _ = datasets.load_iris(return_X_y=True, as_frame=True)
-    df = pd.DataFrame(df)
     grid = {"eps": np.arange(0.25, 3.25, 0.25), "min_samples": [5, 20, 50]}
     search = ClusterOptimizer(
         cluster.DBSCAN(),

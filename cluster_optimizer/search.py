@@ -232,20 +232,17 @@ def _fit_and_score(
 
     start_time = time.time()
 
-    # X_train, y_train = _safe_split(estimator, X, y, train)
-    # X_test, y_test = _safe_split(estimator, X, y, test, train)
-
     result = {}
     try:
         if y is None:
             estimator.fit(X, **fit_params)
         else:
             estimator.fit(X, y, **fit_params)
-
     except Exception as e:
         # Note fit time as time until error
         fit_time = time.time() - start_time
         score_time = 0.0
+        noise_ratio = np.nan
         if error_score == "raise":
             raise
         elif isinstance(error_score, numbers.Number):
