@@ -1,7 +1,7 @@
 from types import MappingProxyType
 from typing import Iterable
 import numpy as np
-from sklearn import metrics
+from sklearn import metrics, preprocessing as pp
 from sklearn.metrics._scorer import _BaseScorer, _passthrough_scorer
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_consistent_length, check_is_fitted
@@ -15,12 +15,22 @@ def _get_labels(estimator):
     else:
         check_is_fitted(estimator, ["labels_"])
         labels = estimator.labels_
-    return labels
+    return np.array(labels)
 
 
 def _noise_ratio(labels, noise_label=-1):
     labels = np.asarray(labels)
     return (labels == noise_label).mean()
+
+
+def _smallest_clust_size(labels, noise_label=-1):
+    labels = pp.LabelEncoder().fit_transform(labels[labels != noise_label])
+    sizes = np.bincount(labels)
+    if sizes.size == 0:
+        smallest_clust_size = -1
+    else:
+        smallest_clust_size = sizes.min()
+    return smallest_clust_size
 
 
 def _remove_noise_cluster(*arrays, labels, noise_label=-1):

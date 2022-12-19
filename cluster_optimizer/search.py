@@ -29,12 +29,15 @@ from sklearn.utils.validation import _check_fit_params, check_is_fitted
 from cluster_optimizer.scorer import (
     _get_labels,
     _noise_ratio,
+    _smallest_clust_size,
     check_multimetric_scoring,
     check_scoring,
 )
 
 
-def _score(estimator, X, y, scorer, error_score="raise", max_noise=0.1):
+def _score(
+    estimator, X, y, scorer, error_score="raise", max_noise=0.1, min_cluster_size=3
+):
     """Compute the score(s) of an estimator on a given data set.
 
     Will return a dict of floats if `scorer` is a dict, otherwise a single
@@ -46,6 +49,7 @@ def _score(estimator, X, y, scorer, error_score="raise", max_noise=0.1):
         scorers = {0: scorer}
 
     noise_ratio = _noise_ratio(_get_labels(estimator))
+    smallest_clust_size = _smallest_clust_size(_get_labels(estimator))
     if noise_ratio > max_noise:
         if error_score == "raise":
             raise RuntimeError(f"Noise ratio {noise_ratio:.2f} > {max_noise:.2f}.")
@@ -53,6 +57,18 @@ def _score(estimator, X, y, scorer, error_score="raise", max_noise=0.1):
             scores = {name: error_score for name in scorers}
             warnings.warn(
                 f"Noise ratio {noise_ratio:.2f} > {max_noise:.2f}. "
+                f"The score for these parameters will be set to {error_score}.",
+                UserWarning,
+            )
+    elif smallest_clust_size < min_cluster_size:
+        if error_score == "raise":
+            raise RuntimeError(
+                f"Smallest cluster too small: {smallest_clust_size:.0f} < {min_cluster_size:.0f}."
+            )
+        else:
+            scores = {name: error_score for name in scorers}
+            warnings.warn(
+                f"Smallest cluster too small: {smallest_clust_size:.0f} < {min_cluster_size:.0f}."
                 f"The score for these parameters will be set to {error_score}.",
                 UserWarning,
             )
@@ -102,9 +118,11 @@ def _fit_and_score(
     return_times=False,
     return_estimator=False,
     return_noise_ratios=False,
+    return_smallest_clust_sizes=False,
     candidate_progress=None,
     error_score=np.nan,
     max_noise=0.1,
+    min_cluster_size=3,
 ):
 
     """Fit estimator and compute scores for a given dataset split.
@@ -243,6 +261,7 @@ def _fit_and_score(
         fit_time = time.time() - start_time
         score_time = 0.0
         noise_ratio = np.nan
+        smallest_clust_size = -1
         if error_score == "raise":
             raise
         elif isinstance(error_score, numbers.Number):
@@ -260,8 +279,9 @@ def _fit_and_score(
         result["fit_failed"] = False
 
         fit_time = time.time() - start_time
-        scores = _score(estimator, X, y, scorer, error_score, max_noise)
+        scores = _score(estimator, X, y, scorer, error_score, max_noise, min_cluster_size)
         noise_ratio = _noise_ratio(_get_labels(estimator))
+        smallest_clust_size = _smallest_clust_size(_get_labels(estimator))
         score_time = time.time() - start_time - fit_time
 
     if verbose > 1:
@@ -273,7 +293,8 @@ def _fit_and_score(
                 result_msg += f" {scorer_name}: ("
                 result_msg += f"score={scores[scorer_name]:.3f})"
         result_msg += f" noise_ratio={noise_ratio:.2f}"
-        result_msg += f" total time={joblib.logger.short_format_time(total_time)}"
+        result_msg += f" smallest_clust_size={min_cluster_size:.0f}"
+        result_msg += f" total_time={joblib.logger.short_format_time(total_time)}"
 
         # Right align the result_msg
         end_msg += "." * (80 - len(end_msg) - len(result_msg))
@@ -295,6 +316,8 @@ def _fit_and_score(
         result["estimator"] = estimator
     if return_noise_ratios:
         result["noise_ratio"] = noise_ratio
+    if return_smallest_clust_sizes:
+        result["smallest_clust_size"] = smallest_clust_size
     return result
 
 
@@ -313,6 +336,7 @@ class BaseSearch(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
         pre_dispatch="2*n_jobs",
         error_score=np.nan,
         max_noise=0.1,
+        min_cluster_size=3,
     ):
         self.scoring = scoring
         self.estimator = estimator
@@ -322,6 +346,7 @@ class BaseSearch(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
         self.pre_dispatch = pre_dispatch
         self.error_score = error_score
         self.max_noise = max_noise
+        self.min_cluster_size = min_cluster_size
 
     @property
     def _estimator_type(self):
@@ -656,9 +681,11 @@ class BaseSearch(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
                 return_n_samples=True,
                 return_times=True,
                 return_noise_ratios=True,
+                return_smallest_clust_sizes=True,
                 return_parameters=False,
                 error_score=self.error_score,
                 max_noise=self.max_noise,
+                min_cluster_size=self.min_cluster_size,
                 verbose=self.verbose,
             )
         )
@@ -791,6 +818,7 @@ class BaseSearch(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
                 )
 
         _store("noise_ratio", out["noise_ratio"])
+        _store("smallest_clust_size", out["smallest_clust_size"])
         _store("fit_time", out["fit_time"])
         _store("score_time", out["score_time"])
         # Use one MaskedArray and mask all the places where the param is not
@@ -1005,6 +1033,7 @@ class ClusterOptimizer(BaseSearch):
         pre_dispatch="2*n_jobs",
         error_score=np.nan,
         max_noise=0.1,
+        min_cluster_size=3,
     ):
         super().__init__(
             estimator=estimator,
@@ -1018,6 +1047,7 @@ class ClusterOptimizer(BaseSearch):
         self.param_grid = param_grid
         _check_param_grid(param_grid)
         self.max_noise = max_noise
+        self.min_cluster_size = min_cluster_size
 
     def _run_search(self, evaluate_candidates):
         """Search all candidates in param_grid"""

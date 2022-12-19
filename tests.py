@@ -60,6 +60,7 @@ def test_singular_metric():
             "score",
             "score_time",
             "noise_ratio",
+            "smallest_clust_size",
         ]
     )
 
@@ -107,6 +108,7 @@ def test_multi_metric():
             "silhouette",
             "score_time",
             "noise_ratio",
+            "smallest_clust_size",
         ]
     )
 
@@ -161,5 +163,6 @@ def test_pipeline():
             "score",
             "score_time",
             "noise_ratio",
+            "smallest_clust_size",
         ]
     )
